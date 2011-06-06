@@ -5,10 +5,11 @@ var Point={
 }
 var points=[];
 function draw() {
-    var windowWidth=$(window).width()-30,
+    var netStep=30,
+        windowWidth=$(window).width()-30,
         windowHeight=$(window).height()-30,
-        canvasWidth = Math.floor(windowWidth/40)*40+1,
-        canvasHeight = Math.floor(windowHeight/40)*40+1,
+        canvasWidth = Math.floor(windowWidth/netStep)*netStep+1,
+        canvasHeight = Math.floor(windowHeight/netStep)*netStep+1,
         canvas = document.getElementById('game_field'),
         ctx = canvas.getContext('2d');
 
@@ -20,14 +21,10 @@ function draw() {
         var offset=$(canvas).offset(),
             relX=ev.clientX-offset.left,
             relY=ev.clientY-offset.top,
-            xOrder=Math.round(relX/40),
-            yOrder=Math.round(relY/40),
-            newX=xOrder*40,
-            newY=yOrder*40;
-       console.log(offset,relX,relY);
-       console.log(relX/40,relY/40);
-       console.log(Math.floor(relX/40),Math.floor(relY/40));
-       console.log(newX,newY);
+            xOrder=Math.round(relX/netStep),
+            yOrder=Math.round(relY/netStep),
+            newX=xOrder*netStep,
+            newY=yOrder*netStep;
        var newPoint=Object.create(Point);
        newPoint.x=newX;
        newPoint.y=newY;
@@ -38,13 +35,13 @@ function draw() {
 
     ctx.fillStyle = 'red';
     //vertical lines
-    for (var x = 0.5; x < canvasWidth; x += 40){
+    for (var x = 0.5; x < canvasWidth; x += netStep){
         ctx.moveTo(x, 0);
         ctx.lineTo(x, canvasHeight);
     }
 
     //horizontal lines
-    for (var y = 0.5; y < canvasHeight; y += 40){
+    for (var y = 0.5; y < canvasHeight; y += netStep){
         ctx.moveTo(0, y);
         ctx.lineTo(canvasWidth, y);
     }
