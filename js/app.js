@@ -8,17 +8,26 @@ var Point={
     toString:function(){
         return 'x='+this.x+';y='+this.y+';userId='+this.userId;
     },
-    possibleConnections:function(userId){
+    possibleConnections:function(userId,skippedPoint){
+        //extract 30 as variable
         var topTop=this.topTop(30),
             bottomBottom=this.bottomBottom(30),
             leftLeft=this.leftLeft(30),
             rightRight=this.rightRight(30),
             possibleConnections=new Data.Hash(),
             realConnections=new Data.Hash();
-        possibleConnections.set(topTop.uniqueId(),topTop);
-        possibleConnections.set(bottomBottom.uniqueId(),bottomBottom);
-        possibleConnections.set(leftLeft.uniqueId(),leftLeft);
-        possibleConnections.set(rightRight.uniqueId(),rightRight);
+        if(!skippedPoint || skippedPoint.uniqueId()===topTop.uniqueId()){
+            possibleConnections.set(topTop.uniqueId(),topTop);
+        }
+        if(!skippedPoint || skippedPoint.uniqueId()===bottomBottom.uniqueId()){
+            possibleConnections.set(bottomBottom.uniqueId(),bottomBottom);
+        }
+        if(!skippedPoint || skippedPoint.uniqueId()===leftLeft.uniqueId()){
+            possibleConnections.set(leftLeft.uniqueId(),leftLeft);
+        }
+        if(!skippedPoint || skippedPoint.uniqueId()===rightRight.uniqueId()){
+            possibleConnections.set(rightRight.uniqueId(),rightRight);
+        }
         //getting from possible connection real points that were pressed by the user
         possibleConnections.each(function(val,key){
             var realPoint=points.get(key);
@@ -26,7 +35,21 @@ var Point={
                 realConnections.set(realPoint.uniqueId(),realPoint);
             }
         });
-        console.log('Real connections',realConnections.length);
+        return realConnections;
+    },
+    findPath:function(userId,points,iteration){
+        iteration=iteration||0;
+        iteration++;
+        console.log('Iteration:',iteration,';Points:',points.length);
+        //var possibleConnections=this.possibleConnections(userId);
+        var self=this,
+            possibleConnections=points;
+        possibleConnections.each(function(val,key,index){
+            console.log('New possible connections:',this.possibleConnections(userId,val));
+            points=points.union(this.possibleConnections(userId,val));
+            console.log('New full array of points',points)
+            self.findPath(userId,points,iteration);
+        });
     },
     topTop:function(step){
         var topTopPoint=Object.create(Point,{
@@ -69,8 +92,7 @@ function draw(){
 
     $(canvas).attr('width',canvasWidth);
     $(canvas).attr('height',canvasHeight);
-
-
+    //handle click on canvas
     $(canvas).click(function(ev){
         var offset=$(canvas).offset(),
             relX=ev.clientX-offset.left,
@@ -79,6 +101,7 @@ function draw(){
             yOrder=Math.round(relY/netStep),
             newX=xOrder*netStep,
             newY=yOrder*netStep,
+            //temporary test solution for identifying player
             userId=(counter%2===0)?'Anton':'Maryna',
             newPoint=Object.create(Point,{
                 x:{value:newX},
@@ -88,10 +111,13 @@ function draw(){
        if(!points.get(newPoint.uniqueId())){
            points.set(newPoint.uniqueId(),newPoint);
            console.log('New point:',newPoint.uniqueId(),newPoint.userId);
-           drawCircle(ctx,newX,newY,10);
+           drawCircle(ctx,newPoint,10);
        }
     });
-
+    //draw lines
+    drawLines(ctx,netStep,canvasWidth,canvasHeight);
+};
+function drawLines(ctx,netStep,canvasWidth,canvasHeight){
     //vertical lines
     for (var x=0.5;x<canvasWidth;x+=netStep){
         ctx.moveTo(x,0);
@@ -103,20 +129,25 @@ function draw(){
         ctx.moveTo(0, y);
         ctx.lineTo(canvasWidth,y);
     }
-
+    //lines style: color
     ctx.strokeStyle='#eee';
     ctx.stroke();
+
 };
-function drawCircle(context,x,y,radius){
+function drawCircle(context,point,radius){
     context.beginPath();
     if(counter%2===0){
         context.fillStyle='rgba(250, 0, 0, 1)';
     }else{
         context.fillStyle='rgba(0, 250, 0, 1)';
     }
-    context.arc(x,y,radius,0,Math.PI*2,true);
+    context.arc(point.x,point.y,radius,0,Math.PI*2,true);
     context.fill();
     counter++;
+    //just for testing
     console.log('Pressed points',points.length);
-    points.at(0).possibleConnections('Maryna');
+    var initialPossibleConnections=point.possibleConnections(point.userId);
+    console.log('Very initial possible connections:',initialPossibleConnections);
+    point.findPath(point.userId,initialPossibleConnections);
+    console.log('Initial possible connections:',initialPossibleConnections);
 };
