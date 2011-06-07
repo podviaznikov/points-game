@@ -40,13 +40,12 @@ var Point={
     findPath:function(userId,points,iteration){
         iteration=iteration||0;
         iteration++;
-        console.log('Iteration:',iteration,';Points:',points.length);
-        //var possibleConnections=this.possibleConnections(userId);
         var self=this,
             possibleConnections=points;
+        console.log('Iteration:',iteration,';Points:',possibleConnections.length);
         possibleConnections.each(function(val,key,index){
-            console.log('New possible connections:',this.possibleConnections(userId,val));
-            points=points.union(this.possibleConnections(userId,val));
+            console.log('New possible connections:',self.possibleConnections(userId,val));
+            points=points.union(self.possibleConnections(userId,val));
             console.log('New full array of points',points)
             self.findPath(userId,points,iteration);
         });
