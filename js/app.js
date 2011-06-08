@@ -16,16 +16,16 @@ var Point={
             rightRight=this.rightRight(30),
             possibleConnections=new Data.Hash(),
             realConnections=new Data.Hash();
-        if(!skippedPoint || skippedPoint.uniqueId()===topTop.uniqueId()){
+        if(!skippedPoint||skippedPoint.uniqueId()!==topTop.uniqueId()){
             possibleConnections.set(topTop.uniqueId(),topTop);
         }
-        if(!skippedPoint || skippedPoint.uniqueId()===bottomBottom.uniqueId()){
+        if(!skippedPoint||skippedPoint.uniqueId()!==bottomBottom.uniqueId()){
             possibleConnections.set(bottomBottom.uniqueId(),bottomBottom);
         }
-        if(!skippedPoint || skippedPoint.uniqueId()===leftLeft.uniqueId()){
+        if(!skippedPoint||skippedPoint.uniqueId()!==leftLeft.uniqueId()){
             possibleConnections.set(leftLeft.uniqueId(),leftLeft);
         }
-        if(!skippedPoint || skippedPoint.uniqueId()===rightRight.uniqueId()){
+        if(!skippedPoint||skippedPoint.uniqueId()!==rightRight.uniqueId()){
             possibleConnections.set(rightRight.uniqueId(),rightRight);
         }
         //getting from possible connection real points that were pressed by the user
@@ -41,14 +41,17 @@ var Point={
         iteration=iteration||0;
         iteration++;
         var self=this,
-            possibleConnections=points;
-        console.log('Iteration:',iteration,';Points:',possibleConnections.length);
-        possibleConnections.each(function(val,key,index){
-            console.log('New possible connections:',self.possibleConnections(userId,val));
-            points=points.union(self.possibleConnections(userId,val));
-            console.log('New full array of points',points)
-            self.findPath(userId,points,iteration);
-        });
+            possibleConnections=new Data.Hash(points.toArray());
+        console.log('Iteration:',iteration,';Points:',possibleConnections.length,possibleConnections);
+        if(iteration<15){
+            possibleConnections.each(function(val,key,index){
+                console.log('debug',val);
+                console.log('New possible connections:',val.possibleConnections(userId),'from point:',val);
+                points=points.union(val.possibleConnections(userId,self));
+                console.log('New full array of points:',points.length,points)
+                self.findPath(userId,points,iteration);
+            });
+        }
     },
     topTop:function(step){
         var topTopPoint=Object.create(Point,{
@@ -144,9 +147,9 @@ function drawCircle(context,point,radius){
     context.fill();
     counter++;
     //just for testing
-    console.log('Pressed points',points.length);
+    //console.log('Pressed points',points.length);
     var initialPossibleConnections=point.possibleConnections(point.userId);
-    console.log('Very initial possible connections:',initialPossibleConnections);
+    //console.log('Very initial possible connections:',initialPossibleConnections);
     point.findPath(point.userId,initialPossibleConnections);
-    console.log('Initial possible connections:',initialPossibleConnections);
+    console.log('End possible connections:',initialPossibleConnections);
 };
