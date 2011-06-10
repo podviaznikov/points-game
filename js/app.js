@@ -1,5 +1,13 @@
 var counter=0,
     points=new Data.Hash();
+var Path={
+    createNew:function(startPoint){
+        return Object.create(this,{path:{value:'/'+startPoint.uniqueId()}});
+    },
+    createFrom:function(point){
+        return Object.create(this,{path:{value:this.path+'/'+point.uniqueId()}});
+    }
+};
 var Point={
     //unique identifier of the point(based on coordinates).
     uniqueId:function(){
@@ -8,48 +16,51 @@ var Point={
     toString:function(){
         return 'x='+this.x+';y='+this.y+';userId='+this.userId;
     },
-    possibleConnections:function(userId,skippedPoint){
+    nearestPoints:function(userId,skippedPoint){
         //extract 30 as variable
         var topTop=this.topTop(30),
             bottomBottom=this.bottomBottom(30),
             leftLeft=this.leftLeft(30),
             rightRight=this.rightRight(30),
-            possibleConnections=new Data.Hash(),
-            realConnections=new Data.Hash();
+            possiblePoints=new Data.Hash(),
+            realPoints=new Data.Hash();
         if(!skippedPoint||skippedPoint.uniqueId()!==topTop.uniqueId()){
-            possibleConnections.set(topTop.uniqueId(),topTop);
+            possiblePoints.set(topTop.uniqueId(),topTop);
         }
         if(!skippedPoint||skippedPoint.uniqueId()!==bottomBottom.uniqueId()){
-            possibleConnections.set(bottomBottom.uniqueId(),bottomBottom);
+            possiblePoints.set(bottomBottom.uniqueId(),bottomBottom);
         }
         if(!skippedPoint||skippedPoint.uniqueId()!==leftLeft.uniqueId()){
-            possibleConnections.set(leftLeft.uniqueId(),leftLeft);
+            possiblePoints.set(leftLeft.uniqueId(),leftLeft);
         }
         if(!skippedPoint||skippedPoint.uniqueId()!==rightRight.uniqueId()){
-            possibleConnections.set(rightRight.uniqueId(),rightRight);
+            possiblePoints.set(rightRight.uniqueId(),rightRight);
         }
         //getting from possible connection real points that were pressed by the user
-        possibleConnections.each(function(val,key){
+        possiblePoints.each(function(val,key){
             var realPoint=points.get(key);
             if(realPoint && realPoint.userId===userId){
-                realConnections.set(realPoint.uniqueId(),realPoint);
+                realPoints.set(realPoint.uniqueId(),realPoint);
             }
         });
-        return realConnections;
+        return realPoints;
     },
-    findPath:function(userId,points,iteration){
+    findPath:function(userId,points,iteration,path){
         iteration=iteration||0;
         iteration++;
-        var self=this,
-            possibleConnections=new Data.Hash(points.toArray());
-        console.log('Iteration:',iteration,';Points:',possibleConnections.length,possibleConnections);
-        if(iteration<15){
-            possibleConnections.each(function(val,key,index){
-                console.log('debug',val);
-                console.log('New possible connections:',val.possibleConnections(userId),'from point:',val);
-                points=points.union(val.possibleConnections(userId,self));
-                console.log('New full array of points:',points.length,points)
-                self.findPath(userId,points,iteration);
+        var self=this;
+            //newPoints=new Data.Hash();
+        console.log('Iteration:',iteration,';Points:',points.length,'Current point is=',this,';Current path:',path.path);
+        if(iteration<5){
+            points.each(function(point,key,index){
+                var newPoints=point.nearestPoints(userId,self);
+                if(newPoints.length>0){
+                    console.log('New possible connections:',newPoints,'from point:',point,'On iteration',iteration,';Points',points.length);
+                    points=points.union(newPoints);
+                    console.log('New full array of points:',points.length,points)
+                    var newPath=path.createFrom(point);
+                    point.findPath(userId,points,iteration,newPath);
+                }
             });
         }
     },
@@ -148,8 +159,10 @@ function drawCircle(context,point,radius){
     counter++;
     //just for testing
     //console.log('Pressed points',points.length);
-    var initialPossibleConnections=point.possibleConnections(point.userId);
+    var initialNearestPoints=point.nearestPoints(point.userId);
     //console.log('Very initial possible connections:',initialPossibleConnections);
-    point.findPath(point.userId,initialPossibleConnections);
-    console.log('End possible connections:',initialPossibleConnections);
+    var path=Path.createNew(point);
+    console.log('Initial path:',path.path);
+    point.findPath(point.userId,initialNearestPoints,0,path);
+    console.log('End points:',initialNearestPoints);
 };
