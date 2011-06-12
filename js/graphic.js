@@ -19,5 +19,13 @@ var graphic={
         ctx.fillStyle=style;
         ctx.arc(point.x,point.y,radius,0,Math.PI*2,true);
         ctx.fill();
+    },
+    drawLine:function(ctx,startPoint,endPoint,style){
+        ctx.beginPath();
+        ctx.moveTo(startPoint.x,startPoint.y);
+        ctx.lineTo(endPoint.x,endPoint.y);
+        ctx.strokeStyle=style;
+        ctx.closePath();
+        ctx.stroke();
     }
 }
