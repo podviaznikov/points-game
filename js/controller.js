@@ -16,8 +16,7 @@ var AppController={
         this.canvasEl=$(this.canvas);
         this.documentEl=$(document);
         this.canvasOffset=this.canvasEl.offset();
-
-
+        //setup canvas
         this.setupCanvas(this.canvasEl);
         //draw lines
         graphic.drawLines(this.ctx,this.netStep,this.canvasWidth,this.canvasHeight);
