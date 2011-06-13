@@ -11,8 +11,14 @@ var Point={
     uniqueId:function(){
         return 'x_'+this.x+'y_'+this.y;
     },
+    equals:function(point){
+        return this.x===point.x && this.y===point.y;
+    },
     toString:function(){
         return 'x='+this.x+';y='+this.y+';userId='+this.userId;
+    },
+    isNear:function(point){
+        return (this.x===point.x || this.x===point.x-30 || this.x===point.x+30) && (this.y===point.y || this.y===point.y-30 || this.y===point.y+30);
     },
     nearestPoints:function(userId,skippedPoint){
         //extract 30 as variable

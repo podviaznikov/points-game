@@ -67,7 +67,8 @@ var AppController={
                 console.log('end');
                 var endPointCandidate=AppController.buildNormalizedPoint(e.clientX,e.clientY),
                     endPoint=AppController.points.get(endPointCandidate.uniqueId());
-                if(endPoint && AppController.startPoint.userId===endPoint.userId){
+                if(endPoint && AppController.startPoint && AppController.startPoint.userId===endPoint.userId
+                && endPoint.isNear(AppController.startPoint)){
                     console.log('Build line',endPoint,AppController.startPoint);
                     var style=endPoint.userId==='Anton'?'red':'green';
                     graphic.drawLine(AppController.ctx,AppController.startPoint,endPoint,style);
